@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/HianzuoSpring.iml" filepath="$PROJECT_DIR$/HianzuoSpring.iml" />
+      <module fileurl="file://E:\FlyhandHome\git\android-spring1\HianzuoSpring.iml" filepath="E:\FlyhandHome\git\android-spring1\HianzuoSpring.iml" />
       <module fileurl="file://$PROJECT_DIR$/LibSpring/LibSpring.iml" filepath="$PROJECT_DIR$/LibSpring/LibSpring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android-spring1.iml" filepath="$PROJECT_DIR$/android-spring1.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

@@ -22,6 +22,71 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
+/*task clean(type: Delete) {
     delete rootProject.buildDir
+}*/
+
+// *********************************************************************
+apply plugin: 'maven'
+apply plugin: 'signing' //使用signing plugin做数字签名
+
+//定义GroupID和Version，ArtefactID会自动使用Project名
+group = 'com.hianzuo.android'
+version = '1.0.0'
+
+repositories {
+    mavenCentral();
+}
+
+artifacts {
+    archives file('LibSpring.aar')
+}
+signing {
+    sign configurations.archives
+}
+//上传完成后： 登陆： https://oss.sonatype.org/#view-repositories
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            //为Pom文件做数字签名
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            //指定项目部署到的中央库地址，UserName和Password就是Part 1中注册的账号。
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            //构造项目的Pom文件，参见Part 2中Pom文件的规范，不要遗漏必填项
+            pom.project {
+                name project.name
+                packaging 'aar'
+                description 'Android Application Sqlite access framwork.'
+                url 'https://github.com/hianzuo/android-spring'
+                scm {
+                    url 'scm:git@github.com:hianzuo/android-spring.git'
+                    connection 'scm:git@github.com:hianzuo/android-spring.git'
+                    developerConnection 'git@github.com:hianzuo/android-spring.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'hianzuo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'ryanch741'
+                        name 'chenyuan'
+                        email '80950159@qq.com'
+                    }
+                }
+            }
+        }
+    }
 }
