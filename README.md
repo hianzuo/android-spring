@@ -97,4 +97,55 @@ public class TestServiceAspect {
     }
 ```
 
+### Service Annotation Support
+```java
+@Service
+public class TestServiceImpl implements TestService {
+    @Resource
+    private PrintService printService;
+
+    @Resource(beanName = "testBean")
+    private BeanTest testBean;
+
+    @Resource(beanName = "methodIsBeanName")
+    private BeanTest testBean1;
+
+    @Override
+    public void handle() {
+        printService.print();
+        System.out.println("AAA BeanTest :" + testBean.getText());
+        System.out.println("AAA BeanTest1 :" + testBean1.getText());
+        System.out.println("AAA TestService.handle.");
+    }
+
+    @Override
+    public void execute() {
+        System.out.println("AAA TestService.execute.");
+    }
+}
+```
+### Cache Support
+```java
+@Component
+public class DemoProviderImpl extends AbstractCacheAble<Integer, Demo> {
+    @Override
+    protected Integer getKey(Demo demo) {
+        return demo.getId();
+    }
+
+    @Override
+    protected List<Demo> loadData() {
+        //load Demo data from remote server or database 
+        ArrayList<Demo> list = new ArrayList<>();
+        list.add(new Demo(1, "aaa"));
+        list.add(new Demo(2, "bbb"));
+        return list;
+    }
+}
+```
+
+### Repository Annotation Support
+
+@Repository like @Service Annotation for the Component.
+
 
