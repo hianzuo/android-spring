@@ -20,8 +20,10 @@ public class SimpleApplication extends Application {
         super.onCreate();
         //if in dev mode ,please line blow code
         SpringInitializer.devMode();
-        //spring init.
-        SpringInitializer.init(this,"com.hianzuo.spring.simple.test.");
+        //spring init， you can add more package to scan spring component.
+        SpringInitializer.init(this,
+                "com.hianzuo.spring.simple.test.",
+                "other package to scan spring component");
     }
 }
 ```
