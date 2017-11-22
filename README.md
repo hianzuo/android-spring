@@ -6,48 +6,23 @@ Android-spring is a android library project support IOC , DI , AOP and HTTP/Hand
 * Step 1. Add the dependency
 
 ```gradle
-dependencies {
-	compile 'com.hianzuo.spring:spring:1.0'
+ dependencies {
+   compile 'com.hianzuo.android:LibSpring:1.0.0'
+ }
+```
+
+* Step 2. Init spring from Application
+
+```java
+public class SimpleApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        //if in dev mode ,please line blow code
+        SpringInitializer.devMode();
+        //spring init.
+        SpringInitializer.init(this,"com.hianzuo.spring.simple.test.");
+    }
 }
 ```
 
-## Implement
-
-```XML
-<nl.dionsegijn.steppertouch.StepperTouch
-        android:id="@+id/stepperTouch"
-        android:layout_width="100dp"
-        android:layout_height="40dp" />
-```
-
-Quick example written in Kotlin:
-
-```Kotlin
-val stepperTouch = findViewById(R.id.stepperTouch) as StepperTouch
-stepperTouch.stepper.setMin(0)
-stepperTouch.stepper.setMax(3)
-stepperTouch.stepper.addStepCallback(object : OnStepCallback {
-	override fun onStep(value: Int, positive: Boolean) {
-    	Toast.makeText(applicationContext, value.toString(), Toast.LENGTH_SHORT).show()
-	}
-})
-```
-
-You are able to further customize or set initial values with styled attributes: 
-
-Add res-auto to your xml layout if you haven't yet
- 
-```XML
-xmlns:app="http://schemas.android.com/apk/res-auto"
-``` 
-
-After that the following attributes will become available:
-
-```XML
-app:stepperBackgroundColor=""
-app:stepperButtonColor=""
-app:stepperActionsColor=""
-app:stepperActionsDisabledColor=""
-app:stepperTextColor=""
-app:stepperTextSize=""
-```
