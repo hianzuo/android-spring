@@ -77,7 +77,9 @@ public abstract class BaseHandler {
         return null;
     }
 
-    protected abstract Object getMethodParamObject(String value);
+    protected Object getMethodParamObject(String value) {
+        return null;
+    }
 
     private Method getHandleMethod(Object handlerObject) {
         Method[] methods = handlerObject.getClass().getMethods();
