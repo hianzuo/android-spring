@@ -1,34 +1,13 @@
-# Introction
+# Introduction
+
+Android-spring is a android library project support IOC , DI , AOP and HTTP/Handler , it use annotation to config 。 It contains a simple project. 
 
 
-Stepper Touch for Android based on a Material Up showcase designed by [Oleg Frolov](https://material.uplabs.com/posts/stepper-touch-interface)
-
-In the latest version of the support library (25.3.0) a new class SpringAnimation was made available. I wanted to test this out and not long after that I found Stepper Touch, a concept made in FramerJS, on Material Up. I took this oppertunity to play with SpringAnimations.
-
-[<img src="media/demo.gif" width="300" />]()
-
-Try it yourself:
-
-[<img src="media/google-play-badge.png" width="250" />](https://play.google.com/store/apps/details?id=nl.dionsegijn.steppertouchdemo)
-
-## Gradle
-
-* Step 1. Add the JitPack repository to your build file
-
-```gradle
-allprojects {
-    repositories {
-        ...
-        maven { url 'https://jitpack.io' }
-    }
-}
-```
-
-* Step 2. Add the dependency
+* Step 1. Add the dependency
 
 ```gradle
 dependencies {
-	compile 'com.github.DanielMartinus:Stepper-Touch:0.6'
+	compile 'com.hianzuo.spring:spring:1.0'
 }
 ```
 
