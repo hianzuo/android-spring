@@ -79,32 +79,33 @@ public class MultiDexUtils {
     public static List<String> getAllClasses(Context context) {
         try {
             List<String> sourcePaths = getSourcePaths(context);
-            return getAllClasses(sourcePaths);
+            return getAllClasses(context, sourcePaths);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    static List<String> getAllClasses(List<String> sourcePaths) throws IOException {
+    static List<String> getAllClasses(Context context, List<String> sourcePaths) {
         List<String> classNames = new ArrayList<>();
         for (String path : sourcePaths) {
             DexFile dexfile = null;
             try {
-                if (path.endsWith(EXTRACTED_SUFFIX)) {
-                    //NOT use new DexFile(path), because it will throw "permission error in /data/dalvik-cache"
-                    dexfile = DexFile.loadDex(path, path + ".tmp", 0);
-                } else {
-                    dexfile = new DexFile(path);
-                }
+                //NOT use new DexFile(path), because it will throw "permission error in /data/dalvik-cache"
+                String tmpFile = context.getFilesDir() + "/dex.tmp";
+//                Log.w("MultiDexUtils", "load dex : " + path);
+                dexfile = DexFile.loadDex(path, tmpFile, 0);
                 Enumeration<String> dexEntries = dexfile.entries();
                 while (dexEntries.hasMoreElements()) {
                     classNames.add(dexEntries.nextElement());
                 }
             } catch (IOException e) {
-                throw new IOException("Error at loading dex file '" + path + "'");
+                throw new RuntimeException("Error at loading dex file '" + path + "'");
             } finally {
                 if (null != dexfile) {
-                    dexfile.close();
+                    try {
+                        dexfile.close();
+                    } catch (IOException ignored) {
+                    }
                 }
             }
         }

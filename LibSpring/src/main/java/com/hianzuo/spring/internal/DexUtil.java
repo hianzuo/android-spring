@@ -104,7 +104,7 @@ public class DexUtil {
 
     private static List<String> allClassesInternal(Context context) {
         try {
-            return MultiDexUtils.getAllClasses(getSourcePaths(context));
+            return MultiDexUtils.getAllClasses(context,getSourcePaths(context));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
