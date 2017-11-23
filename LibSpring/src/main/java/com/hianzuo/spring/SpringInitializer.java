@@ -14,10 +14,10 @@ import com.hianzuo.spring.core.InstanceFactory;
 public class SpringInitializer {
     public static void init(Application application, String... pnScan) {
         long st = System.currentTimeMillis();
-        Log.i("SpringInitializer", "start...");
+        Log.w("SpringInitializer", "start...");
         InstanceFactory.init(application, pnScan);
         ActivitySupport.init(application);
-        Log.i("SpringInitializer", "end, speed:" + (System.currentTimeMillis() - st) + " ms");
+        Log.w("SpringInitializer", "end, speed:" + (System.currentTimeMillis() - st) + " ms");
     }
 
     public static void devMode(){

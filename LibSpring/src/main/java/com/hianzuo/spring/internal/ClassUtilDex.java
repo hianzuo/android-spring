@@ -17,10 +17,10 @@ public class ClassUtilDex {
     public static List<Class<?>> getClasses(Context context, String pkg) {
         List<Class<?>> list = new ArrayList<>();
         try {
-            List<String> allClasses = MultiDexHelper.getAllClasses(context);
+            List<String> allClasses = MultiDexUtils.getAllClasses(context);
             ClassLoader classLoader = context.getClassLoader();
             for (String clazzPath : allClasses) {
-                Log.i(TAG, clazzPath);
+                Log.w(TAG, clazzPath);
                 if (clazzPath.startsWith(pkg)) {
                     Class<?> c;
                     try {

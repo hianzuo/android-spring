@@ -29,27 +29,27 @@ public class DexUtil {
         long st = System.currentTimeMillis();
         List<String> list = null;
         if (devMode) {
-            Log.e(TAG, "all classes on debug mode");
+            Log.w(TAG, "all classes on debug mode");
             //开发调试模式，需要每次读取
         } else if (isUpdateVersion(context)) {
-            Log.e(TAG, "all classes on update version");
+            Log.w(TAG, "all classes on update version");
             //更新版本了，需要读取一次
         } else {
             //否则从缓存读取
             list = allClassesFromCache(context);
             if (null != list && list.size() > 0) {
-                Log.e(TAG, "all classes from cache");
+                Log.w(TAG, "all classes from cache");
             } else {
-                Log.e(TAG, "all classes on first time");
+                Log.w(TAG, "all classes on first time");
             }
         }
         if (null == list || list.isEmpty()) {
             //重新获取
             list = allClassesInternal(context);
-            Log.e(TAG, "all classes count: " + list.size());
+            Log.w(TAG, "all classes count: " + list.size());
             saveAllClassesToCache(context, list);
         }
-        Log.e(TAG, "all classes speed time: " + (System.currentTimeMillis() - st));
+        Log.w(TAG, "all classes speed time: " + (System.currentTimeMillis() - st));
         return list;
     }
 

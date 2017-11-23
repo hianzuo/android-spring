@@ -74,10 +74,10 @@ public class InstanceFactory {
         if (null == uiHandler) {
             uiHandler = new android.os.Handler();
         }
-        Log.i("SpringInitializer", "scan class start . ");
+        Log.w("SpringInitializer", "scan class start . ");
         long st = System.currentTimeMillis();
         List<Class<?>> scanClassList = scanAllClasses(context, devMode, pnScan);
-        Log.i("SpringInitializer", "scan class end , speed:" + (System.currentTimeMillis() - st) + " count:" + scanClassList.size());
+        Log.w("SpringInitializer", "scan class end , speed:" + (System.currentTimeMillis() - st) + " count:" + scanClassList.size());
         try {
             List<Class<?>> factoryClazzList = new ArrayList<>();
             for (Class<?> javaClass : scanClassList) {
@@ -129,19 +129,19 @@ public class InstanceFactory {
     private static List<Class<?>> scanAllClasses(Context context, boolean devMode, String[] pnScan) {
         Set<String> classNameSet;
         if (devMode) {
-            Log.i("SpringInitializer", "scanAllClassNameList on Debug Mode");
+            Log.w("SpringInitializer", "scanAllClassNameList on Debug Mode");
             classNameSet = scanAllClassNameList(context, pnScan);
         } else if (isUpdateVersion(context)) {
-            Log.i("SpringInitializer", "scanAllClassNameList on Update Version");
+            Log.w("SpringInitializer", "scanAllClassNameList on Update Version");
             classNameSet = scanAllClassNameList(context, pnScan);
         } else {
             classNameSet = getScanAllClassNameList(context);
             if (null == classNameSet) {
-                Log.i("SpringInitializer", "scanAllClassNameList on FirstTime");
+                Log.w("SpringInitializer", "scanAllClassNameList on FirstTime");
                 classNameSet = scanAllClassNameList(context, pnScan);
                 saveScanAllClassNameList(context, classNameSet);
             } else {
-                Log.i("SpringInitializer", "scanAllClassNameList from cache");
+                Log.w("SpringInitializer", "scanAllClassNameList from cache");
                 refreshScanAllClassNameList(context, pnScan);
             }
         }

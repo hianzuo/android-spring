@@ -154,7 +154,7 @@ public class MultiDexUtils {
             }
         }
 
-        Log.i("MultiDex", "VM with version " + versionString + (isVmMultiDexCapable ? " has multidex support" : " does not have multidex support"));
+        Log.w("MultiDex", "VM with version " + versionString + (isVmMultiDexCapable ? " has multidex support" : " does not have multidex support"));
         return isVmMultiDexCapable;
     }
 }
