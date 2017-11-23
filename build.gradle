@@ -25,14 +25,13 @@ allprojects {
 /*task clean(type: Delete) {
     delete rootProject.buildDir
 }*/
-/*
 // *********************************************************************
 apply plugin: 'maven'
 apply plugin: 'signing' //使用signing plugin做数字签名
 
 //定义GroupID和Version，ArtefactID会自动使用Project名
 group = 'com.hianzuo.android'
-version = '1.0.0'
+version = '1.0.1'
 
 repositories {
     mavenCentral();
@@ -89,4 +88,4 @@ uploadArchives {
             }
         }
     }
-}*/
+}
