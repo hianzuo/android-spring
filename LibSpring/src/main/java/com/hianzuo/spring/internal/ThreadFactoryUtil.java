@@ -1,7 +1,5 @@
 package com.hianzuo.spring.internal;
 
-import android.support.annotation.NonNull;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -71,7 +69,7 @@ public class ThreadFactoryUtil {
         }
 
         @Override
-        public Thread newThread(@NonNull Runnable r) {
+        public Thread newThread(Runnable r) {
             Thread t = new Thread(group, r,
                     namePrefix + threadNumber.getAndIncrement(),
                     0);

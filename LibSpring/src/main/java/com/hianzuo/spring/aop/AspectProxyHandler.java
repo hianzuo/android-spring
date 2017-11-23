@@ -115,9 +115,12 @@ class AspectProxyHandler implements ProxyHandler {
             return aspectAdviceMethods;
         }
         aspectAdviceMethods = new ArrayList<>();
+        if (null == method) {
+            return aspectAdviceMethods;
+        }
         methodMap.put(method, aspectAdviceMethods);
         List<AspectAdviceMethod> methods = dataMap.get(adviceClass);
-        if (null == method) {
+        if (null == methods) {
             return aspectAdviceMethods;
         }
         for (AspectAdviceMethod adviceMethod : methods) {
