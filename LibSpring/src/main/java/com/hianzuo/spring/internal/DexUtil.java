@@ -46,6 +46,7 @@ public class DexUtil {
         if (null == list || list.isEmpty()) {
             //重新获取
             list = allClassesInternal(context);
+            Log.e(TAG, "all classes count: " + list.size());
             saveAllClassesToCache(context, list);
         }
         Log.e(TAG, "all classes speed time: " + (System.currentTimeMillis() - st));
