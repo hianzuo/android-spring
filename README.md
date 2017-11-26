@@ -165,6 +165,14 @@ public class HttpLoginHandler extends BaseHandler {
         return null;
     }
 
+    @CheckMethod
+    protected String check(@MethodParam("username") String username) {
+        if (StringUtil.isEmpty(username) || username.trim().length() < 4) {
+            throws new RuntimeException("用户名不能为空");
+        }
+        return null;
+    }
+
     @Resource
     private LoginService loginService;
 
