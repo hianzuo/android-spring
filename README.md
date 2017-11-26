@@ -7,7 +7,7 @@ Android-spring is a android library project support IOC , DI , AOP and HTTP/Hand
 
 ```gradle
  dependencies {
-   compile 'com.hianzuo.android:LibSpring:1.0.3'
+   compile 'com.hianzuo.android:LibSpring:1.0.4'
  }
 ```
 
