@@ -1,6 +1,9 @@
 package com.hianzuo.spring.http;
 
 
+import com.hianzuo.spring.exception.CheckMethodFailure;
+import com.hianzuo.spring.internal.StringUtil;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -12,18 +15,72 @@ import java.util.HashMap;
  */
 
 public abstract class BaseHandler {
-    private static HashMap<Class<?>, Method> handleMethodMap = new HashMap<>();
+    private static HashMap<Class<?>, CallMethod> handleMethodMap = new HashMap<>();
+    private static HashMap<Class<?>, CallMethod> checkMethodMap = new HashMap<>();
 
     public <T> T execute() {
         Object handlerObject = getHandlerObject();
-        Method method = handleMethodMap.get(handlerObject.getClass());
-        if (null == method) {
-            method = getHandleMethod(handlerObject);
-            if (null == method) {
-                throw new RuntimeException("handle method not exist in controller.");
+        CallMethod checkMethod = getMethod(handlerObject, checkMethodMap,
+                CheckMethod.class, "check");
+        if (!checkMethod.isNull()) {
+            Object obj = callMethod(handlerObject, checkMethod.target);
+            if (!isEmptyObj(obj)) {
+                throw new CheckMethodFailure(obj);
             }
-            handleMethodMap.put(getClass(), method);
         }
+        CallMethod handleMethod = getMethod(handlerObject, handleMethodMap,
+                HandleMethod.class, "handle");
+        if (handleMethod.isNull()) {
+            throw new RuntimeException("handle method not exist in controller.");
+        }
+        return callMethod(handlerObject, handleMethod.target);
+    }
+
+    private boolean isEmptyObj(Object obj) {
+        if (null == obj) {
+            return true;
+        }
+        if (obj instanceof String) {
+            return StringUtil.isBlank(obj);
+        }
+        return false;
+    }
+
+    private static CallMethod getMethod(Object handlerObject, HashMap<Class<?>, CallMethod> methodMap,
+                                        Class<? extends Annotation> methodType, String defMethodName) {
+        Class<?> handlerClass = handlerObject.getClass();
+        CallMethod method = methodMap.get(handlerClass);
+        if (null == method) {
+            method = getMethod(handlerObject, methodType, defMethodName);
+            methodMap.put(handlerClass, method);
+        }
+        return method;
+    }
+
+    private static CallMethod getMethod(Object handlerObject, Class<? extends Annotation> methodType, String defMethodName) {
+        Method[] methods = handlerObject.getClass().getMethods();
+        if (null == methods) {
+            return null;
+        }
+        Method handleNameMethod = null;
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(methodType)) {
+                return new CallMethod(method);
+            }
+            if (defMethodName.equals(method.getName())) {
+                if (!Modifier.isPublic(method.getModifiers())) {
+                    continue;
+                }
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+                handleNameMethod = method;
+            }
+        }
+        return new CallMethod(handleNameMethod);
+    }
+
+    private <T> T callMethod(Object handlerObject, Method method) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] parameterObjects = new Object[parameterTypes.length];
@@ -81,26 +138,16 @@ public abstract class BaseHandler {
         return null;
     }
 
-    private Method getHandleMethod(Object handlerObject) {
-        Method[] methods = handlerObject.getClass().getMethods();
-        if (null == methods) {
-            return null;
+    private static class CallMethod {
+        private Method target;
+
+        CallMethod(Method target) {
+            this.target = target;
         }
-        Method handleNameMethod = null;
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(HandleMethod.class)) {
-                return method;
-            }
-            if ("handle".equals(method.getName())) {
-                if (!Modifier.isPublic(method.getModifiers())) {
-                    continue;
-                }
-                if (Modifier.isStatic(method.getModifiers())) {
-                    continue;
-                }
-                handleNameMethod = method;
-            }
+
+        public boolean isNull() {
+            return null == target;
         }
-        return handleNameMethod;
     }
+
 }
