@@ -5,6 +5,7 @@ import com.hianzuo.spring.exception.CheckMethodFailure;
 import com.hianzuo.spring.internal.StringUtil;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public abstract class BaseHandler {
         CallMethod handleMethod = getMethod(handlerObject, handleMethodMap,
                 HandleMethod.class, "handle");
         if (handleMethod.isNull()) {
-            throw new RuntimeException("handle method not exist in controller.");
+            throw new RuntimeException("no handle method found in handler.");
         }
         return callMethod(handlerObject, handleMethod.target);
     }
@@ -103,8 +104,16 @@ public abstract class BaseHandler {
     }
 
     private <T> T invokeHandleMethod(Object handlerObject, Method handleMethod, Object[] parameterObjects) throws Exception {
-        //noinspection unchecked
-        return (T) handleMethod.invoke(handlerObject, parameterObjects);
+        try {
+            //noinspection unchecked
+            return (T) handleMethod.invoke(handlerObject, parameterObjects);
+        } catch (InvocationTargetException e) {
+            Throwable throwable = e.getTargetException();
+            if (null != throwable && throwable instanceof Exception) {
+                throw (Exception) throwable;
+            }
+            throw e;
+        }
     }
 
     private Object getParameterObject(Class<?> parameterType, Annotation[] parameterAnnotation) {
