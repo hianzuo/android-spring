@@ -2,6 +2,7 @@ package com.hianzuo.spring.http;
 
 
 import com.hianzuo.spring.exception.CheckMethodFailure;
+import com.hianzuo.spring.internal.ReflectUtils;
 import com.hianzuo.spring.internal.StringUtil;
 
 import java.lang.annotation.Annotation;
@@ -9,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Ryan
@@ -59,8 +61,8 @@ public abstract class BaseHandler {
     }
 
     private static CallMethod getMethod(Object handlerObject, Class<? extends Annotation> methodType, String defMethodName) {
-        Method[] methods = handlerObject.getClass().getMethods();
-        if (null == methods) {
+        List<Method> methods = ReflectUtils.getMethods(handlerObject.getClass());
+        if (null == methods || methods.isEmpty()) {
             return null;
         }
         Method handleNameMethod = null;
