@@ -31,7 +31,7 @@ apply plugin: 'signing' //使用signing plugin做数字签名
 
 //定义GroupID和Version，ArtefactID会自动使用Project名
 group = 'com.hianzuo.android'
-version = '1.0.4'
+version = '1.0.5'
 
 repositories {
     mavenCentral();

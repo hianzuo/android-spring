@@ -65,22 +65,24 @@ public abstract class BaseHandler {
         if (null == methods || methods.isEmpty()) {
             return null;
         }
-        Method handleNameMethod = null;
         for (Method method : methods) {
             if (method.isAnnotationPresent(methodType)) {
                 return new CallMethod(method);
             }
+            if (Modifier.isAbstract(method.getModifiers())) {
+                continue;
+            }
+            if (Modifier.isNative(method.getModifiers())) {
+                continue;
+            }
+            if (Modifier.isStatic(method.getModifiers())) {
+                continue;
+            }
             if (defMethodName.equals(method.getName())) {
-                if (!Modifier.isPublic(method.getModifiers())) {
-                    continue;
-                }
-                if (Modifier.isStatic(method.getModifiers())) {
-                    continue;
-                }
-                handleNameMethod = method;
+                return new CallMethod(method);
             }
         }
-        return new CallMethod(handleNameMethod);
+        return new CallMethod(null);
     }
 
     private <T> T callMethod(Object handlerObject, Method method) {
@@ -154,6 +156,7 @@ public abstract class BaseHandler {
 
         CallMethod(Method target) {
             this.target = target;
+            this.target.setAccessible(true);
         }
 
         public boolean isNull() {
