@@ -10,11 +10,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan
@@ -24,6 +22,7 @@ import java.util.List;
 public abstract class BaseHandler {
     private static HashMap<Class<?>, CallMethod> handleMethodMap = new HashMap<>();
     private static HashMap<Class<?>, CallMethod> checkMethodMap = new HashMap<>();
+    private Map<String, String> mQueryMap;
 
     public <T> T execute() {
         Object handlerObject = getHandlerObject();
@@ -135,7 +134,7 @@ public abstract class BaseHandler {
         boolean isMethodParam = false;
         if (null != param) {
             isMethodParam = true;
-            obj = getMethodParamObjectInternal(parameterType, param.value());
+            obj = getMethodParamObject(parameterType, param.value());
         }
         if (null == obj) {
             obj = getMethodParamObjectByType(parameterType);
@@ -149,27 +148,6 @@ public abstract class BaseHandler {
 
     protected Object getMethodParamObjectByType(Class<?> type) {
         return null;
-    }
-
-    private Object getMethodParamObjectInternal(Class<?> type, String value) {
-        Object obj = getMethodParamObject(type, value);
-        if (null == obj) {
-            return null;
-        }
-        if (obj.getClass().isAssignableFrom(type)) {
-            return obj;
-        }
-        if (obj instanceof CharSequence) {
-            if (type.isPrimitive()) {
-                type = getRefType(type);
-            }
-            obj = tryToCaseToType(type, (CharSequence) obj);
-        }
-        if (!obj.getClass().isAssignableFrom(type)) {
-            throw new RuntimeException("the @MethodParam[" + value + "] expect type[" + type.getName()
-                    + "] but get [" + obj.getClass().getName() + "]");
-        }
-        return obj;
     }
 
     private Object tryToCaseToType(Class<?> type, CharSequence value) {
@@ -210,8 +188,38 @@ public abstract class BaseHandler {
         return type;
     }
 
-    protected <T> T getMethodParamObject(Class<T> type, String value) {
-        return null;
+    private Object getMethodParamObject(Class<?> type, String value) {
+        Object obj = getMethodParamObject(value);
+        if (null == obj) {
+            return null;
+        }
+        if (obj.getClass().isAssignableFrom(type)) {
+            return obj;
+        }
+        if (obj instanceof CharSequence) {
+            caseValueToType(type, value);
+        }
+        if (!obj.getClass().isAssignableFrom(type)) {
+            throw new RuntimeException("the @MethodParam[" + value + "] expect type[" + type.getName()
+                    + "] but get [" + obj.getClass().getName() + "]");
+        }
+        return obj;
+    }
+
+    protected Object caseValueToType(Class<?> type, CharSequence value) {
+        if (type.isPrimitive()) {
+            type = getRefType(type);
+        }
+        return tryToCaseToType(type, value);
+    }
+
+    public BaseHandler setParameterMap(Map<String, String> queryMap) {
+        this.mQueryMap = queryMap;
+        return this;
+    }
+
+    protected <T> T getMethodParamObject(String value) {
+        return (T) mQueryMap.get(value);
     }
 
     private static class CallMethod {
@@ -219,7 +227,9 @@ public abstract class BaseHandler {
 
         CallMethod(Method target) {
             this.target = target;
-            this.target.setAccessible(true);
+            if (null != target) {
+                this.target.setAccessible(true);
+            }
         }
 
         public boolean isNull() {

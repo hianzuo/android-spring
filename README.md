@@ -7,7 +7,7 @@ Android-spring is a android library project support IOC , DI , AOP and HTTP/Hand
 
 ```gradle
  dependencies {
-   compile 'com.hianzuo.android:LibSpring:1.0.4'
+   compile 'com.hianzuo.android:LibSpring:1.0.6'
  }
 ```
 
@@ -146,30 +146,23 @@ public class DemoProviderImpl extends AbstractCacheAble<Integer, Demo> {
 ### Http Handler Support
 ```java
 @Handler("/api/login")
+@Handler("/api/login")
 public class HttpLoginHandler extends BaseHandler {
 
     @Override
     protected Object getMethodParamObjectByType(Class<?> type) {
-        if(type == LoginData.class){
-            String username = (String) getMethodParamObject("username");
-            String password = (String) getMethodParamObject("password");
-            return new LoginData(username,password);
+        if (type == LoginData.class) {
+            String username = getMethodParamObject(String.class, "username");
+            String password = getMethodParamObject(String.class, "password");
+            return new LoginData(username, password);
         }
         return super.getMethodParamObjectByType(type);
     }
 
     @Override
-    protected Object getMethodParamObject(String value) {
+    protected <T> T getMethodParamObject(Class<T> type, String value) {
         // get value from request.
         // demo request.getParameter(value);
-        return null;
-    }
-
-    @CheckMethod
-    protected String check(@MethodParam("username") String username) {
-        if (StringUtil.isEmpty(username) || username.trim().length() < 4) {
-            throws new RuntimeException("用户名不能为空");
-        }
         return null;
     }
 

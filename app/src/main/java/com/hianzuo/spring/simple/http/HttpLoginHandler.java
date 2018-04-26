@@ -2,7 +2,6 @@ package com.hianzuo.spring.simple.http;
 
 import com.hianzuo.spring.annotation.Handler;
 import com.hianzuo.spring.annotation.Resource;
-import com.hianzuo.spring.http.BaseHandler;
 import com.hianzuo.spring.http.HandleMethod;
 import com.hianzuo.spring.simple.LoginService;
 import com.hianzuo.spring.simple.model.LoginData;
@@ -13,24 +12,7 @@ import com.hianzuo.spring.simple.model.LoginData;
  */
 
 @Handler("/api/login")
-public class HttpLoginHandler extends BaseHandler {
-
-    @Override
-    protected Object getMethodParamObjectByType(Class<?> type) {
-        if (type == LoginData.class) {
-            String username = getMethodParamObject(String.class, "username");
-            String password = getMethodParamObject(String.class, "password");
-            return new LoginData(username, password);
-        }
-        return super.getMethodParamObjectByType(type);
-    }
-
-    @Override
-    protected <T> T getMethodParamObject(Class<T> type, String value) {
-        // get value from request.
-        // demo request.getParameter(value);
-        return null;
-    }
+public class HttpLoginHandler extends BaseTestHandler {
 
     @Resource
     private LoginService loginService;
@@ -41,7 +23,10 @@ public class HttpLoginHandler extends BaseHandler {
         loginService.login(username, password);
     }*/
 
-    //you can get DataModel in Method Param , register in (Object getMethodParamObjectByType(Class<?> type))
+    /**
+     * you can get DataModel in Method Param , register in (Object getMethodParamObjectByType(Class<?> type))
+     * @param data
+     */
     @HandleMethod
     public void handle(LoginData data) {
         loginService.login(data.getUsername(), data.getPassword());

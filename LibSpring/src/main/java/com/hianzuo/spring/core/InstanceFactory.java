@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.hianzuo.spring.annotation.Component;
 import com.hianzuo.spring.annotation.Handler;
+import com.hianzuo.spring.http.BaseHandler;
 import com.hianzuo.spring.internal.AnnotationUtil;
 import com.hianzuo.spring.internal.ApplicationUtil;
 import com.hianzuo.spring.internal.DexUtil;
@@ -295,5 +296,30 @@ public class InstanceFactory {
                 new InternalBean("tempBean", obj));
         buildInternalBeanList(new ArrayList<Class<?>>(), beans, BEAN_GETTER);
         return beans.get(0);
+    }
+
+    private static HashMap<String, Class<? extends BaseHandler>> mHandlerClassMap;
+
+    public static <T extends BaseHandler> T newHandler(String handlerName) {
+        initHandlerClassMap();
+        Class<? extends BaseHandler> handlerClazz = mHandlerClassMap.get(handlerName);
+        if (null == handlerClazz) {
+            throw new RuntimeException("handler name [" + handlerName + "] is not existed.");
+        }
+        //noinspection unchecked
+        return (T) newObj(handlerClazz);
+    }
+
+    private synchronized static void initHandlerClassMap() {
+        if (null == mHandlerClassMap) {
+            mHandlerClassMap = new HashMap<>(32);
+            List<Class<? extends BaseHandler>> controllerClassList =
+                    InstanceFactory.getBeansWithAnnotation(Handler.class);
+            for (Class<? extends BaseHandler> controllerClass : controllerClassList) {
+                List<Annotation> annotations = AnnotationUtil.get(controllerClass, Handler.class);
+                String uri = AnnotationUtil.joinValue(annotations);
+                mHandlerClassMap.put(uri, controllerClass);
+            }
+        }
     }
 }
