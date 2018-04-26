@@ -7,7 +7,7 @@ Android-spring is a android library project support IOC , DI , AOP and HTTP/Hand
 
 ```gradle
  dependencies {
-   compile 'com.hianzuo.android:LibSpring:1.0.6'
+   compile 'com.hianzuo.android:LibSpring:1.0.7'
  }
 ```
 
@@ -145,26 +145,36 @@ public class DemoProviderImpl extends AbstractCacheAble<Integer, Demo> {
 ```
 ### Http Handler Support
 ```java
-@Handler("/api/login")
-@Handler("/api/login")
-public class HttpLoginHandler extends BaseHandler {
 
+public class BaseTestHandler extends BaseHandler {
     @Override
     protected Object getMethodParamObjectByType(Class<?> type) {
         if (type == LoginData.class) {
-            String username = getMethodParamObject(String.class, "username");
-            String password = getMethodParamObject(String.class, "password");
+            String username = getMethodParamObject("username");
+            String password = getMethodParamObject("password");
             return new LoginData(username, password);
         }
         return super.getMethodParamObjectByType(type);
     }
 
     @Override
-    protected <T> T getMethodParamObject(Class<T> type, String value) {
+    protected <T> T getMethodParamObject(String value) {
         // get value from request.
         // demo request.getParameter(value);
-        return null;
+
+        //noinspection unchecked
+        return super.getMethodParamObject(value);
     }
+
+    @Override
+    protected Object caseValueToType(Class<?> type, CharSequence value) {
+        // you can custom your type here.
+        return super.caseValueToType(type, value);
+    }
+}
+
+@Handler("/api/login")
+public class HttpLoginHandler extends BaseTestHandler {
 
     @Resource
     private LoginService loginService;
@@ -175,7 +185,10 @@ public class HttpLoginHandler extends BaseHandler {
         loginService.login(username, password);
     }*/
 
-    //you can get DataModel in Method Param , register in (Object getMethodParamObjectByType(Class<?> type))
+    /**
+     * you can get DataModel in Method Param , register in (Object getMethodParamObjectByType(Class<?> type))
+     * @param data
+     */
     @HandleMethod
     public void handle(LoginData data) {
         loginService.login(data.getUsername(), data.getPassword());
