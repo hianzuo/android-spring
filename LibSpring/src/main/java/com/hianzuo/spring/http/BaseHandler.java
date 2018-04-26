@@ -197,7 +197,7 @@ public abstract class BaseHandler {
             return obj;
         }
         if (obj instanceof CharSequence) {
-            caseValueToType(type, value);
+            obj = caseValueToType(type, (CharSequence) obj);
         }
         if (!obj.getClass().isAssignableFrom(type)) {
             throw new RuntimeException("the @MethodParam[" + value + "] expect type[" + type.getName()
