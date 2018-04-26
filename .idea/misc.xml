@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <list size="2">
-      <item index="0" class="java.lang.String" itemvalue="com.hianzuo.spring.annotation.Service" />
-      <item index="1" class="java.lang.String" itemvalue="com.hianzuo.spring.http.HandleMethod" />
+    <list size="4">
+      <item index="0" class="java.lang.String" itemvalue="com.hianzuo.spring.annotation.Handler" />
+      <item index="1" class="java.lang.String" itemvalue="com.hianzuo.spring.annotation.Service" />
+      <item index="2" class="java.lang.String" itemvalue="com.hianzuo.spring.aop.Aspect" />
+      <item index="3" class="java.lang.String" itemvalue="com.hianzuo.spring.http.HandleMethod" />
     </list>
     <writeAnnotations>
       <writeAnnotation name="com.hianzuo.spring.annotation.Resource" />
