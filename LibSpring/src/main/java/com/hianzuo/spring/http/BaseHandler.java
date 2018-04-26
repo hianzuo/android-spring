@@ -6,9 +6,13 @@ import com.hianzuo.spring.internal.ReflectUtils;
 import com.hianzuo.spring.internal.StringUtil;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -131,7 +135,7 @@ public abstract class BaseHandler {
         boolean isMethodParam = false;
         if (null != param) {
             isMethodParam = true;
-            obj = getMethodParamObject(param.value());
+            obj = getMethodParamObjectInternal(parameterType, param.value());
         }
         if (null == obj) {
             obj = getMethodParamObjectByType(parameterType);
@@ -147,7 +151,66 @@ public abstract class BaseHandler {
         return null;
     }
 
-    protected Object getMethodParamObject(String value) {
+    private Object getMethodParamObjectInternal(Class<?> type, String value) {
+        Object obj = getMethodParamObject(type, value);
+        if (null == obj) {
+            return null;
+        }
+        if (obj.getClass().isAssignableFrom(type)) {
+            return obj;
+        }
+        if (obj instanceof CharSequence) {
+            if (type.isPrimitive()) {
+                type = getRefType(type);
+            }
+            obj = tryToCaseToType(type, (CharSequence) obj);
+        }
+        if (!obj.getClass().isAssignableFrom(type)) {
+            throw new RuntimeException("the @MethodParam[" + value + "] expect type[" + type.getName()
+                    + "] but get [" + obj.getClass().getName() + "]");
+        }
+        return obj;
+    }
+
+    private Object tryToCaseToType(Class<?> type, CharSequence value) {
+        String valueStr = value.toString();
+        try {
+            Method valueOfMethod = type.getMethod("valueOf", String.class);
+            valueOfMethod.setAccessible(true);
+            return valueOfMethod.invoke(null, valueStr);
+        } catch (Exception e) {
+            try {
+                Constructor<?> constructor = type.getConstructor(String.class);
+                return constructor.newInstance(valueStr);
+            } catch (Exception e1) {
+                return value;
+            }
+        }
+    }
+
+
+    private Class<?> getRefType(Class<?> type) {
+        if (byte.class == type) {
+            return Byte.class;
+        } else if (int.class == type) {
+            return Integer.class;
+        } else if (char.class == type) {
+            return Character.class;
+        } else if (long.class == type) {
+            return Long.class;
+        } else if (boolean.class == type) {
+            return Boolean.class;
+        } else if (double.class == type) {
+            return Double.class;
+        } else if (short.class == type) {
+            return Short.class;
+        } else if (float.class == type) {
+            return Float.class;
+        }
+        return type;
+    }
+
+    protected <T> T getMethodParamObject(Class<T> type, String value) {
         return null;
     }
 

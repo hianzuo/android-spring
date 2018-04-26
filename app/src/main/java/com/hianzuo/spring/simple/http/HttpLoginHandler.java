@@ -17,16 +17,16 @@ public class HttpLoginHandler extends BaseHandler {
 
     @Override
     protected Object getMethodParamObjectByType(Class<?> type) {
-        if(type == LoginData.class){
-            String username = (String) getMethodParamObject("username");
-            String password = (String) getMethodParamObject("password");
-            return new LoginData(username,password);
+        if (type == LoginData.class) {
+            String username = getMethodParamObject(String.class, "username");
+            String password = getMethodParamObject(String.class, "password");
+            return new LoginData(username, password);
         }
         return super.getMethodParamObjectByType(type);
     }
 
     @Override
-    protected Object getMethodParamObject(String value) {
+    protected <T> T getMethodParamObject(Class<T> type, String value) {
         // get value from request.
         // demo request.getParameter(value);
         return null;
