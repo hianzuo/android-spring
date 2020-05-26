@@ -3,7 +3,6 @@ package com.hianzuo.spring.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.hianzuo.spring.annotation.Component;
 import com.hianzuo.spring.annotation.Handler;
@@ -14,6 +13,7 @@ import com.hianzuo.spring.internal.DexUtil;
 import com.hianzuo.spring.internal.SharedPreferencesUtils;
 import com.hianzuo.spring.internal.StringUtil;
 import com.hianzuo.spring.internal.ThreadFactoryUtil;
+import com.hianzuo.spring.utils.AndroidSpringLog;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -75,10 +75,10 @@ public class InstanceFactory {
         if (null == uiHandler) {
             uiHandler = new android.os.Handler();
         }
-        Log.w("SpringInitializer", "scan class start . ");
+        AndroidSpringLog.w("SpringInitializer scan class start . ");
         long st = System.currentTimeMillis();
         List<Class<?>> scanClassList = scanAllClasses(context, devMode, pnScan);
-        Log.w("SpringInitializer", "scan class end , speed:" + (System.currentTimeMillis() - st) + " count:" + scanClassList.size());
+        AndroidSpringLog.w("SpringInitializer scan class end , speed:" + (System.currentTimeMillis() - st) + " count:" + scanClassList.size());
         try {
             List<Class<?>> factoryClazzList = new ArrayList<>();
             for (Class<?> javaClass : scanClassList) {
@@ -130,19 +130,20 @@ public class InstanceFactory {
     private static List<Class<?>> scanAllClasses(Context context, boolean devMode, String[] pnScan) {
         Set<String> classNameSet;
         if (devMode) {
-            Log.w("SpringInitializer", "scanAllClassNameList on Debug Mode");
+            AndroidSpringLog.w("SpringInitializer scanAllClassNameList on Debug Mode");
             classNameSet = scanAllClassNameList(context, pnScan);
         } else if (isUpdateVersion(context)) {
-            Log.w("SpringInitializer", "scanAllClassNameList on Update Version");
+            AndroidSpringLog.w("SpringInitializer scanAllClassNameList on Update Version");
             classNameSet = scanAllClassNameList(context, pnScan);
+            saveScanAllClassNameList(context, classNameSet);
         } else {
             classNameSet = getScanAllClassNameList(context);
             if (null == classNameSet) {
-                Log.w("SpringInitializer", "scanAllClassNameList on FirstTime");
+                AndroidSpringLog.w("SpringInitializer scanAllClassNameList on FirstTime");
                 classNameSet = scanAllClassNameList(context, pnScan);
                 saveScanAllClassNameList(context, classNameSet);
             } else {
-                Log.w("SpringInitializer", "scanAllClassNameList from cache");
+                AndroidSpringLog.w("SpringInitializer scanAllClassNameList from cache");
                 refreshScanAllClassNameList(context, pnScan);
             }
         }
@@ -157,16 +158,21 @@ public class InstanceFactory {
         return scanClassList;
     }
 
+    private static void updateAppVersionCode(Context context) {
+        int appVersionCode = DexUtil.getPackageVersionCode(context);
+        getVersionSharedPref(context).edit().putInt("version_code",appVersionCode).apply();
+    }
+
     private static boolean isUpdateVersion(Context context) {
-        SharedPreferences preferences = SharedPreferencesUtils.get(context,
-                "spring_" + ApplicationUtil.progressName(context) + "_version");
+        SharedPreferences preferences = getVersionSharedPref(context);
         int versionCode = preferences.getInt("version_code", 0);
         int appVersionCode = DexUtil.getPackageVersionCode(context);
-        if (appVersionCode != versionCode) {
-            preferences.edit().putInt("version_code", appVersionCode).apply();
-            return true;
-        }
-        return false;
+        return appVersionCode != versionCode;
+    }
+
+    private static SharedPreferences getVersionSharedPref(Context context) {
+        return SharedPreferencesUtils.get(context,
+                    "spring_" + ApplicationUtil.progressName(context) + "_version");
     }
 
     private static void refreshScanAllClassNameList(final Context context, final String[] pnScan) {
@@ -192,6 +198,7 @@ public class InstanceFactory {
             @Override
             public void run() {
                 sharedPreferences(context).edit().putStringSet("classes_set", classNameSet).apply();
+                updateAppVersionCode(context);
             }
         });
         executor.shutdown();

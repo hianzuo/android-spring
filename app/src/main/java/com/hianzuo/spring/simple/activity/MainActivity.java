@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hianzuo.spring.annotation.Resource;
 import com.hianzuo.spring.core.InstanceFactory;
@@ -43,9 +44,20 @@ public class MainActivity extends AppCompatActivity {
         testRequest("/api/login", map);
     }
 
+    public void onRegisterBtnClick(View view) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("username", "chenyuan");
+        map.put("password", "123");
+        testRequest("/api/reg", map);
+    }
+
     private void testRequest(String uri, Map<String, String> queryMap) {
-        InstanceFactory.newHandler(uri)
-                .setParameterMap(queryMap)
-                .execute();
+        try {
+            InstanceFactory.newHandler(uri)
+                    .setParameterMap(queryMap)
+                    .execute();
+        } catch (Exception e) {
+            Toast.makeText(this,e.getMessage(),Toast.LENGTH_LONG).show();
+        }
     }
 }

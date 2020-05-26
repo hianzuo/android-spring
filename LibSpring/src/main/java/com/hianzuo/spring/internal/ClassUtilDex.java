@@ -3,6 +3,8 @@ package com.hianzuo.spring.internal;
 import android.content.Context;
 import android.util.Log;
 
+import com.hianzuo.spring.utils.AndroidSpringLog;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +22,7 @@ public class ClassUtilDex {
             List<String> allClasses = MultiDexUtils.getAllClasses(context);
             ClassLoader classLoader = context.getClassLoader();
             for (String clazzPath : allClasses) {
-                Log.w(TAG, clazzPath);
+                AndroidSpringLog.w(TAG+" "+clazzPath);
                 if (clazzPath.startsWith(pkg)) {
                     Class<?> c;
                     try {

@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 
+import com.hianzuo.spring.utils.AndroidSpringLog;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,27 +36,27 @@ public class DexUtil {
         long st = System.currentTimeMillis();
         List<String> list = null;
         if (devMode) {
-            Log.w(TAG, "all classes on debug mode");
+            AndroidSpringLog.w(TAG+" all classes on debug mode");
             //开发调试模式，需要每次读取
         } else if (isUpdateVersion(context)) {
-            Log.w(TAG, "all classes on update version");
+            AndroidSpringLog.w(TAG+" all classes on update version");
             //更新版本了，需要读取一次
         } else {
             //否则从缓存读取
             list = allClassesFromCache(context);
             if (null != list && list.size() > 0) {
-                Log.w(TAG, "all classes from cache");
+                AndroidSpringLog.w(TAG+" all classes from cache");
             } else {
-                Log.w(TAG, "all classes on first time");
+                AndroidSpringLog.w(TAG+" all classes on first time");
             }
         }
         if (null == list || list.isEmpty()) {
             //重新获取
             list = allClassesInternal(context);
-            Log.w(TAG, "all classes count: " + list.size());
+            AndroidSpringLog.w(TAG+" all classes count: " + list.size());
             saveAllClassesToCache(context, list);
         }
-        Log.w(TAG, "all classes speed time: " + (System.currentTimeMillis() - st));
+        AndroidSpringLog.w(TAG+" all classes speed time: " + (System.currentTimeMillis() - st));
         return list;
     }
 
@@ -74,24 +76,28 @@ public class DexUtil {
             @Override
             public void run() {
                 SharedPreferences preferences = sharedPreferences(context);
-                Set<String> set = new HashSet<>();
-                set.addAll(list);
+                Set<String> set = new HashSet<>(list);
                 preferences.edit().putStringSet("set", set).apply();
+                updateDexUtilAppVersion(context);
             }
         });
         executor.shutdown();
     }
 
+    private static void updateDexUtilAppVersion(Context context) {
+        int appVersionCode = getPackageVersionCode(context);
+        getDexUtilPref(context).edit().putInt("version_code", appVersionCode).apply();
+    }
+
     private static boolean isUpdateVersion(Context context) {
-        SharedPreferences preferences = SharedPreferencesUtils.get(context,
-                "dex_util_version");
+        SharedPreferences preferences = getDexUtilPref(context);
         int versionCode = preferences.getInt("version_code", 0);
         int appVersionCode = getPackageVersionCode(context);
-        if (appVersionCode != versionCode) {
-            preferences.edit().putInt("version_code", appVersionCode).apply();
-            return true;
-        }
-        return false;
+        return appVersionCode != versionCode;
+    }
+
+    private static SharedPreferences getDexUtilPref(Context context) {
+        return SharedPreferencesUtils.get(context, "dex_util_version");
     }
 
     private static List<String> allClassesFromCache(Context context) {
@@ -113,11 +119,11 @@ public class DexUtil {
             List<String> dexPathList = getSourcePaths(context);
             List<String> allClasses = new ArrayList<>();
             if (!isDexChanged(context, dexPathList)) {
-                Log.w(TAG, "dex no changed , read from cache");
+                AndroidSpringLog.w(TAG+" dex no changed , read from cache");
                 allClasses = allClassesFromCache(context);
             }
             if (null == allClasses || allClasses.isEmpty()) {
-                Log.w(TAG, "read from get all class");
+                AndroidSpringLog.w(TAG+" read from get all class");
                 allClasses = MultiDexUtils.getAllClasses(context, dexPathList);
             }
             return allClasses;

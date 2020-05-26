@@ -4,7 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
+
+import com.hianzuo.spring.utils.AndroidSpringLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -154,7 +155,7 @@ public class MultiDexUtils {
             }
         }
 
-        Log.w("MultiDex", "VM with version " + versionString + (isVmMultiDexCapable ? " has multidex support" : " does not have multidex support"));
+        AndroidSpringLog.w("MultiDex VM with version " + versionString + (isVmMultiDexCapable ? " has multidex support" : " does not have multidex support"));
         return isVmMultiDexCapable;
     }
 }
