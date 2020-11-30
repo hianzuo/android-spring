@@ -172,7 +172,7 @@ public class InstanceFactory {
 
     private static SharedPreferences getVersionSharedPref(Context context) {
         return SharedPreferencesUtils.get(context,
-                    "spring_" + ApplicationUtil.progressName(context) + "_version");
+                    "android_spring_" + ApplicationUtil.progressName(context) + "_version");
     }
 
     private static void refreshScanAllClassNameList(final Context context, final String[] pnScan) {
@@ -205,11 +205,13 @@ public class InstanceFactory {
     }
 
     private static SharedPreferences sharedPreferences(Context context) {
-        return SharedPreferencesUtils.get(context, ApplicationUtil.progressName(context) + "_classes");
+        return SharedPreferencesUtils.get(context,
+                "android_spring_"+ApplicationUtil.progressName(context) + "_classes");
     }
 
     private static Set<String> getScanAllClassNameList(Context context) {
-        Set<String> set = sharedPreferences(context).getStringSet("classes_set", null);
+        Set<String> set = sharedPreferences(context)
+                .getStringSet("classes_set", null);
         if (null != set && set.size() > 10) {
             return set;
         }
