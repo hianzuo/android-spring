@@ -20,6 +20,13 @@ public class AndroidSpringLog {
         Log.w("AndroidSpringLog", msg);
     }
 
+    public static void d(String msg) {
+        if (null != mListener && mListener.d(msg, null)) {
+            return;
+        }
+        Log.d("AndroidSpringLog", msg);
+    }
+
     public static void w(String msg, Object attach) {
         if (null != mListener && mListener.w(msg, attach)) {
             return;

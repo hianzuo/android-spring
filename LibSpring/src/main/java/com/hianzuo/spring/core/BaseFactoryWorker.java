@@ -1,5 +1,7 @@
 package com.hianzuo.spring.core;
 
+import com.hianzuo.spring.utils.AndroidSpringLog;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -78,6 +80,8 @@ public abstract class BaseFactoryWorker {
             return beanObj;
         }
         try {
+            AndroidSpringLog.d("SpringInitializer getOrNewTargetObj beanName:" +
+                    beanName + ", class:" + beanClazz.getName());
             return beanClazz.newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);

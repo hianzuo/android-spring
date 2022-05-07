@@ -12,11 +12,17 @@ import com.hianzuo.spring.utils.AndroidSpringLog;
  */
 
 public class SpringInitializer {
+    private static volatile boolean isActivitySupportInit = false;
+
     public static void init(Application application, String... pnScan) {
         long st = System.currentTimeMillis();
         AndroidSpringLog.w("SpringInitializer start...");
         InstanceFactory.init(application, pnScan);
-        ActivitySupport.init(application);
+        if (!isActivitySupportInit) {
+            isActivitySupportInit = true;
+            AndroidSpringLog.w("SpringInitializer activity support init...");
+            ActivitySupport.init(application);
+        }
         AndroidSpringLog.w("SpringInitializer end, speed:" + (System.currentTimeMillis() - st) + " ms");
     }
 

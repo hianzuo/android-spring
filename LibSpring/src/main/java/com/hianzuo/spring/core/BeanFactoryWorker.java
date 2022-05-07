@@ -3,6 +3,7 @@ package com.hianzuo.spring.core;
 import com.hianzuo.spring.annotation.Component;
 import com.hianzuo.spring.internal.AnnotationUtil;
 import com.hianzuo.spring.internal.StringUtil;
+import com.hianzuo.spring.utils.AndroidSpringLog;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class BeanFactoryWorker extends BaseFactoryWorker {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            AndroidSpringLog.d("SpringInitializer initComponentBean beanName:" + beanName + ", class:" + beanClazz.getName());
             list.add(new InternalBean(beanName, null, obj));
         }
         return list;

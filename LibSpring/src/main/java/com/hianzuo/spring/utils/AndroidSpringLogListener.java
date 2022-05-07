@@ -6,4 +6,5 @@ package com.hianzuo.spring.utils;
  */
 public interface AndroidSpringLogListener {
     boolean w(String msg, Object attach);
+    boolean d(String msg, Object attach);
 }

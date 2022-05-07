@@ -3,6 +3,7 @@ package com.hianzuo.spring.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 
 import com.hianzuo.spring.annotation.Component;
 import com.hianzuo.spring.annotation.Handler;
@@ -22,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -78,7 +80,8 @@ public class InstanceFactory {
         AndroidSpringLog.w("SpringInitializer scan class start . ");
         long st = System.currentTimeMillis();
         List<Class<?>> scanClassList = scanAllClasses(context, devMode, pnScan);
-        AndroidSpringLog.w("SpringInitializer scan class end , speed:" + (System.currentTimeMillis() - st) + " count:" + scanClassList.size());
+        AndroidSpringLog.w("SpringInitializer scan class end , speed:" +
+                (System.currentTimeMillis() - st) + " count:" + scanClassList.size());
         try {
             List<Class<?>> factoryClazzList = new ArrayList<>();
             for (Class<?> javaClass : scanClassList) {
@@ -117,7 +120,9 @@ public class InstanceFactory {
         return buildInternalBeanList(scanClassList, beanList, null);
     }
 
-    private static List<InternalBean> buildInternalBeanList(List<Class<?>> scanClassList, List<InternalBean> beanList, BeanGetter beanGetter) {
+    private static List<InternalBean> buildInternalBeanList(List<Class<?>> scanClassList,
+                                                            List<InternalBean> beanList,
+                                                            BeanGetter beanGetter) {
         for (BaseFactoryWorker adapter : mFactoryWorkerAdapters) {
             beanList = adapter.onLoad(scanClassList, beanList, beanGetter);
         }
@@ -128,6 +133,14 @@ public class InstanceFactory {
     }
 
     private static List<Class<?>> scanAllClasses(Context context, boolean devMode, String[] pnScan) {
+        Set<Class<?>> linkedSet = new LinkedHashSet<>();
+        for (String pn : pnScan) {
+            linkedSet.addAll(scanAllClassesInternal(context, devMode, pn));
+        }
+        return new ArrayList<>(linkedSet);
+    }
+
+    private static List<Class<?>> scanAllClassesInternal(Context context, boolean devMode, String pnScan) {
         Set<String> classNameSet;
         if (devMode) {
             AndroidSpringLog.w("SpringInitializer scanAllClassNameList on Debug Mode");
@@ -135,13 +148,13 @@ public class InstanceFactory {
         } else if (isUpdateVersion(context)) {
             AndroidSpringLog.w("SpringInitializer scanAllClassNameList on Update Version");
             classNameSet = scanAllClassNameList(context, pnScan);
-            saveScanAllClassNameList(context, classNameSet);
+            saveScanAllClassNameList(context, pnScan, classNameSet);
         } else {
-            classNameSet = getScanAllClassNameList(context);
+            classNameSet = getScanAllClassNameList(context, pnScan);
             if (null == classNameSet) {
                 AndroidSpringLog.w("SpringInitializer scanAllClassNameList on FirstTime");
                 classNameSet = scanAllClassNameList(context, pnScan);
-                saveScanAllClassNameList(context, classNameSet);
+                saveScanAllClassNameList(context, pnScan, classNameSet);
             } else {
                 AndroidSpringLog.w("SpringInitializer scanAllClassNameList from cache");
                 refreshScanAllClassNameList(context, pnScan);
@@ -149,10 +162,13 @@ public class InstanceFactory {
         }
         List<Class<?>> scanClassList = new ArrayList<>();
         ClassLoader classLoader = context.getClassLoader();
+        String springBasePackage = getSpringBasePackage();
         for (String className : classNameSet) {
-            try {
-                scanClassList.add(classLoader.loadClass(className));
-            } catch (Exception ignored) {
+            if (matchScan(className, pnScan) || matchScan(className, springBasePackage)) {
+                try {
+                    scanClassList.add(classLoader.loadClass(className));
+                } catch (Exception ignored) {
+                }
             }
         }
         return scanClassList;
@@ -160,7 +176,7 @@ public class InstanceFactory {
 
     private static void updateAppVersionCode(Context context) {
         int appVersionCode = DexUtil.getPackageVersionCode(context);
-        getVersionSharedPref(context).edit().putInt("version_code",appVersionCode).apply();
+        getVersionSharedPref(context).edit().putInt("version_code", appVersionCode).apply();
     }
 
     private static boolean isUpdateVersion(Context context) {
@@ -172,10 +188,10 @@ public class InstanceFactory {
 
     private static SharedPreferences getVersionSharedPref(Context context) {
         return SharedPreferencesUtils.get(context,
-                    "android_spring_" + ApplicationUtil.progressName(context) + "_version");
+                "android_spring_" + ApplicationUtil.progressName(context) + "_version");
     }
 
-    private static void refreshScanAllClassNameList(final Context context, final String[] pnScan) {
+    private static void refreshScanAllClassNameList(final Context context, final String pnScan) {
         uiHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -184,7 +200,7 @@ public class InstanceFactory {
                     @Override
                     public void run() {
                         Set<String> classNameSet = scanAllClassNameList(context, pnScan);
-                        saveScanAllClassNameList(context, classNameSet);
+                        saveScanAllClassNameList(context, pnScan, classNameSet);
                     }
                 });
                 executor.shutdown();
@@ -192,46 +208,55 @@ public class InstanceFactory {
         }, 3000);
     }
 
-    private static void saveScanAllClassNameList(final Context context, final Set<String> classNameSet) {
+    private static void saveScanAllClassNameList(final Context context, final String pnScan, final Set<String> classNameSet) {
         ExecutorService executor = ThreadFactoryUtil.createSingle(InstanceFactory.class);
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                sharedPreferences(context).edit().putStringSet("classes_set", classNameSet).apply();
+                sharedPreferences(context).edit().putStringSet(getClassesSetSpName(pnScan), classNameSet).apply();
                 updateAppVersionCode(context);
             }
         });
         executor.shutdown();
     }
 
-    private static SharedPreferences sharedPreferences(Context context) {
-        return SharedPreferencesUtils.get(context,
-                "android_spring_"+ApplicationUtil.progressName(context) + "_classes");
+    private static String getClassesSetSpName(String pnScan) {
+        return "classes_set_"+pnScan;
     }
 
-    private static Set<String> getScanAllClassNameList(Context context) {
+    private static SharedPreferences sharedPreferences(Context context) {
+        return SharedPreferencesUtils.get(context,
+                "android_spring_" + ApplicationUtil.progressName(context) + "_classes");
+    }
+
+    private static Set<String> getScanAllClassNameList(Context context,String pnScan) {
         Set<String> set = sharedPreferences(context)
-                .getStringSet("classes_set", null);
+                .getStringSet("classes_set_"+pnScan, null);
         if (null != set && set.size() > 10) {
             return set;
         }
         return null;
     }
 
-    private static Set<String> scanAllClassNameList(Context context, String[] pnScan) {
-        if (null == pnScan || pnScan.length == 0) {
+    private static Set<String> scanAllClassNameList(Context context, String pnScan) {
+        if (null == pnScan) {
             return new HashSet<>();
         }
         List<String> classNameList = DexUtil.allClasses(context, devMode);
         Set<String> list = new HashSet<>();
-        String springBasePackage = BaseFactoryWorker.class.getPackage().getName();
-        springBasePackage = springBasePackage.substring(0, springBasePackage.lastIndexOf("."));
+        String springBasePackage = getSpringBasePackage();
         for (String className : classNameList) {
             if (matchScan(className, pnScan) || matchScan(className, springBasePackage)) {
                 list.add(className);
             }
         }
         return list;
+    }
+
+    private static String getSpringBasePackage() {
+        String springBasePackage = BaseFactoryWorker.class.getPackage().getName();
+        springBasePackage = springBasePackage.substring(0, springBasePackage.lastIndexOf("."));
+        return springBasePackage;
     }
 
 
